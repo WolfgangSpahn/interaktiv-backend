@@ -2,7 +2,7 @@
 PY=python
 BIN=.venv/bin
 FIND=find
-Docker='/c/Program Files/Docker/Docker/Docker Desktop.exe'
+
 
 # make it work on windows too
 ifeq ($(OS), Windows_NT)
@@ -10,6 +10,11 @@ ifeq ($(OS), Windows_NT)
     PY="/c/Users/Wolfgang Spahn/scoop/shims/python3"
 	FIND=gfind
 endif
+
+REMOTE_PATH=~/
+IMAGE=interaktiv_server
+SERVER=aws-server
+
 
 help:         ## Show this help.
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e "s/\\$$//" | sed -e "s/##//"
@@ -48,12 +53,17 @@ docker-clean:
 	docker rmi -f interaktiv_server
 
 docker-save:  ## save docker image
-	docker save -o interaktiv_server.tar interaktiv_server && gzip -9 interaktiv_server.tar && mv interaktiv_server.tar.gz ~/AWS/
+	docker save -o $(IMAGE).tar $(IMAGE)&& gzip -9 $(IMAGE).tar
+
+docker-upload:  	 ## Upload the docs to the server
+	scp -r $(IMAGE) $(SERVER):$(REMOTE_PATH)
+
+
 
 .PHONY: static
 static:	      ## pack static files
 static: static/
-	tar -cvf interaktiv_server_static.tar static/ && gzip -9 interaktiv_server_static.tar && mv interaktiv_server_static.tar.gz ~/AWS/
+	tar -cvf interaktiv_server_static.tar static/ && gzip -9 interaktiv_server_static.tar 
 
 .PHONY: dev
 dev:          ## runs entry point directly

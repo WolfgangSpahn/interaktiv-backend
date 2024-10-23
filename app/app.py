@@ -237,6 +237,23 @@ def monitor():
     metrics = get_process_metrics(app.config['global_pid'])
     return jsonify(metrics)
 
+@app.route('/counts', methods=['GET'])
+def get_listener_count():
+    try:
+        # Access the SSE manager stored in app extensions
+        sse = app.extensions["sse-manager"]
+        
+        # Retrieve the actual listener count by invoking the method
+        listener_count_proxy = sse.get_listener_count()  # Proxy object
+        
+        # Use ._getvalue() on the proxy object to force the value retrieval from the server
+        listener_count = listener_count_proxy._getvalue()  # Convert AutoProxy to value
+        
+        return jsonify({"listener_count": listener_count}), 200
+    except Exception as e:
+        logger.error(f"Failed to get listener count: {e}")
+        return jsonify({"error": str(e)}), 500
+
 # test with
 # curl -X GET http://localhost:5050/ipsocket
 @app.route('/ipsocket')

@@ -35,7 +35,7 @@ class MessageAnnouncer:
         # deadlocks when removing listeners
         self.listener_locks = {}
         # self.lock = threading.Lock()
-        # self.start_ping()
+        self.start_ping()
 
     def listen(self):
         """Returns a queue.Queue that blocks until a new item is added to the SSE stream."""
@@ -97,7 +97,7 @@ class MessageAnnouncer:
 
     def ping_clients(self):
         while True:
-            logger.warning(f"SSE -- Sending ping to {len(self.listener_locks.items())} clients")
+            logger.debug(f"SSE -- Sending ping to {len(self.listener_locks.items())} clients")
             to_remove = []
             for q, lock in self.listener_locks.items():
                 with lock:
