@@ -4,7 +4,7 @@ import threading
 import os
 import sys
 
-from flask import g, Flask, request, jsonify, Response,send_from_directory
+from flask import Flask, request, jsonify, Response,send_from_directory
 from flask_cors import CORS
 
 import jsonschema
@@ -15,19 +15,22 @@ from jsonschema.exceptions import ValidationError
 from app.config import config
 from app.utils import get_ip, get_process_metrics
 from app.sse.routes import setup_sse_listen, notify_subscribers, stream
-from app import schema
+from app.schema import likert_schema, user_schema, answer_schema
 
 
 # ---------------------------------------------------------------------------------------------------- Global vars
 version = "0.1.0"
 nicknames = {}
 likertScores = {}
-static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '../static'))
+#static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '../static'))
+static_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../docs'))
+
 
 # ---------------------------------------------------------------------------------------------------- Setup logging
 logger = logging.getLogger(__name__)
 if not logger.handlers:
     print("no logger handlers")
+print(f"static_folder: {static_folder}")
 # ---------------------------------------------------------------------------------------------------- Helper functions
 # Check if the static_folder exists
 if not os.path.exists(static_folder):
@@ -77,10 +80,10 @@ def post_icon_name():
     """Receive a JSON object with a name field, which is equivalent to a anonymous login."""
     data = request.get_json()  # Extract JSON data from request
     try:
-        validate(data, schema.user_schema)
+        validate(data, user_schema)
     except ValidationError as e:
         logger.error(f"Validation error: {e.message}")
-        logger.error(f"Checked against schema: {schema.likert_schema}")
+        logger.error(f"Checked against schema: {likert_schema}")
         return jsonify({'status': 'error', 'message': 'Validation error'}), 400
     uuid = data['uuid']
     nicknames[uuid] = data['user']  # Store the name in the global dictionary
@@ -116,10 +119,10 @@ def post_likert():
     logger.info(f"Received data: {data}")
     # check against json schema
     try:
-        validate(data, schema.likert_schema)
+        validate(data, likert_schema)
     except ValidationError as e:
         logger.error(f"Validation error: {e.message}")
-        logger.error(f"Checked against schema: {schema.likert_schema}")
+        logger.error(f"Checked against schema: {likert_schema}")
         return jsonify({'status': 'error', 'message': 'Validation error'}), 400
     # copy field likert and value to a new dictionary
     # update = {'likert': data['likert'], 'value': data['value']}
@@ -172,10 +175,10 @@ def post_answer():
     """Receive a JSON object with a answer field."""
     data = request.get_json()
     try:
-        validate(data, schema.answer_schema)
+        validate(data, answer_schema)
     except ValidationError as e:
         logger.error(f"Validation error: {e.message}")
-        logger.error(f"Checked against schema: {schema.likert_schema}")
+        logger.error(f"Checked against schema: {likert_schema}")
         return jsonify({'status': 'error', 'message': 'Validation error'}), 400
     # check if the uuid is known
     user = data['user']
@@ -234,6 +237,23 @@ def monitor():
     metrics = get_process_metrics(app.config['global_pid'])
     return jsonify(metrics)
 
+@app.route('/counts', methods=['GET'])
+def get_listener_count():
+    try:
+        # Access the SSE manager stored in app extensions
+        sse = app.extensions["sse-manager"]
+        
+        # Retrieve the actual listener count by invoking the method
+        listener_count_proxy = sse.get_listener_count()  # Proxy object
+        
+        # Use ._getvalue() on the proxy object to force the value retrieval from the server
+        listener_count = listener_count_proxy._getvalue()  # Convert AutoProxy to value
+        
+        return jsonify({"listener_count": listener_count}), 200
+    except Exception as e:
+        logger.error(f"Failed to get listener count: {e}")
+        return jsonify({"error": str(e)}), 500
+
 # test with
 # curl -X GET http://localhost:5050/ipsocket
 @app.route('/ipsocket')
@@ -248,16 +268,21 @@ def ipsocket():
 def serve_frontend():
     user_agent = request.headers.get('User-Agent')
     logger.warning(f"User-Agent: {user_agent} serves {config.app_html}")
-    return send_from_directory(static_folder, config.app_html) # type: ignore
+    
+    response = send_from_directory(static_folder, config.app_html) # type: ignore
+
+    return response
     
 # test with, by getting the favicon
 # curl -X GET http://localhost:5050/favicon.ico
 # to serve all static files (including subdirectory assets)
 @app.route('/<path:filename>')
 def serve_static(filename):
-    # logger.info(f"serve_static: {filename} from {app.static_folder}")
+    logger.info(f"serve_static: {filename} from {static_folder}")
     logger.info(f"serve_static: {filename}")
-    return send_from_directory(static_folder, filename) # type: ignore
+    response = send_from_directory(static_folder, filename) # type: ignore
+    response.headers['Cache-Control'] = 'public, max-age=31536000'
+    return response
 
 
 # ----------------------------------------------------------------------------------------------------- Logging

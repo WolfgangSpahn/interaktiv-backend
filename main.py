@@ -43,4 +43,4 @@ if __name__ == '__main__':
     else:
         from waitress import serve
         logging.info(f"Serving with Waitress on http://{get_ip()}:{config.app_socketNr}")
-        serve(app, host='0.0.0.0', port=config.app_socketNr)
+        serve(app, host='0.0.0.0', port=config.app_socketNr, threads=100, connection_limit=100)

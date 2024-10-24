@@ -51,9 +51,18 @@ def start_sse(ready_event, sse_port):
 				logger.debug(f"SSE -- Sending SSE message: {item}")
 				sse.announce(item)
 
+		# Retrieve the number of current listeners
+		def get_listener_count():
+			with lock:
+				# Count the number of items in listener_locks
+				listener_count = len(sse.listener_locks)
+				logger.debug(f"SSE -- Current listener count: {listener_count}")
+				return listener_count
+
 		# register the methods of the SSE server
 		SSEManager.register("sse_listen", sse_listen)
 		SSEManager.register("sse_put", sse_put)
+		SSEManager.register("get_listener_count", get_listener_count)
 
 		# start the server, to be run in a separate process
 		# Define the server's address and auth key.
@@ -70,3 +79,4 @@ def start_sse(ready_event, sse_port):
 # another process
 SSEManager.register("sse_listen")
 SSEManager.register("sse_put")
+SSEManager.register("get_listener_count")

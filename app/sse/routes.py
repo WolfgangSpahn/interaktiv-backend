@@ -9,13 +9,6 @@ logger = logging.getLogger(__name__)
 
 subscribers = set()  # Store all subscribers to the SSE server
 
-# def notify_subscribers0(data, event_type=None):
-#     """Notify all subscribers with the new data, optionally specifying an event type."""
-#     message = {'data': data}
-#     if event_type:
-#         message['event'] = event_type
-#     for sub in subscribers:
-#         sub.put(json.dumps(message))
 
 def notify_subscribers(sse_manager, data, event_type=None):
     # connect to the remote SSE server
@@ -76,10 +69,3 @@ def setup_sse_listen(app, sse_port):
     app.extensions["sse-manager"] = sse_manager 
     return sse_manager
 
-def create_route(app, sse_manager):
-    # test with
-    # curl -X GET http://localhost:5050/events
-    @app.route('/events')
-    def events():
-        """SSE endpoint for both pings and name changes."""
-        return Response(stream(sse_manager), mimetype='text/event-stream')
