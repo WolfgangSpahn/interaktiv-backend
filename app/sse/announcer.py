@@ -114,4 +114,4 @@ class MessageAnnouncer:
                         del self.listener_locks[q]
                     except ValueError:
                         logger.debug("SSE -- Could not remove listener: Queue was already removed")
-            time.sleep(1)
+            time.sleep(10)

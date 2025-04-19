@@ -43,8 +43,6 @@ lint: .venv
 
 docker:	      ## build docker image
 docker:
-	$(Docker) &
-	read -p "Wait until Docker is running and press enter to continue"
 	docker build -t interaktiv_server . 
 
 .PHONY: docker-clean

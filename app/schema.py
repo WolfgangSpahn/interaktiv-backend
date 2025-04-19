@@ -4,7 +4,7 @@ likert_schema = {
     "properties": {
         "likert": {"type": "string"},
         "user": {"type": "string"},
-        "value": {"type": "string", "pattern": "^[1-5]$"}  # Expecting a value from 1 to 5 in string form
+        "value": {"type": "string", "pattern": "^[0-4]$"}  # Expecting a value from 1 to 5 in string form
     },
     "required": ["likert", "user", "value"]
 }
