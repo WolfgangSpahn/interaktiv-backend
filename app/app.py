@@ -164,8 +164,8 @@ def calcLikertPercentage(likertScores):
     scores = likertScores
     contribs = [contribution[score] for score in list(scores.values())]
     # average the contributions
-    percentage = sum(contribs) / len(contribs) * 100
-    return round(percentage)
+    percentage = sum(contribs) / len(contribs) * 100.0
+    return percentage
 # ------------------------------------------------------------------------------------------------------ Answer routes
 answers = {}
 # post an answer identified by user and question id

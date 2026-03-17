@@ -54,7 +54,7 @@ docker-save:  ## save docker image
 	docker save -o $(IMAGE).tar $(IMAGE)&& gzip -9 $(IMAGE).tar
 
 docker-upload:  	 ## Upload the docs to the server
-	scp -r $(IMAGE) $(SERVER):$(REMOTE_PATH)
+	scp -r $(IMAGE).tar.gz $(SERVER):$(REMOTE_PATH)
 
 
 
@@ -68,9 +68,15 @@ dev:          ## runs entry point directly
 dev:
 	$(BIN)/python main.py
 
-run:	      ## run docker image
+run:	      ## run local docker image
 run:
-	docker run -p 5050:5050 interaktiv_server
+	@if [ "$$(docker ps -q -f name=interaktiv_server)" ]; then \
+		echo "Container 'interaktiv_server' is already running ✅"; \
+	else \
+		echo "Starting container... 🚀"; \
+		docker run -d --name interaktiv_server -p 5050:5050 interaktiv_server; \
+	fi
+
 
 clean:        ## clean up
 clean:
