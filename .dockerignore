@@ -1,0 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Virtual environment directories
+.venv/
+env/
+ENV/
+venv/
+env.bak/
+venv.bak/
+
+# Setuptools egg info
+*.egg-info/
+.eggs/
+
+# Pipenv files
+Pipfile
+Pipfile.lock
+
+# macOS file
+.DS_Store
+
+# Logs and databases
+*.log
+app.log
+
+# Pytest cache
+.pytest_cache/
+
+# Documentation output
+docs/*.pdf
+docs/*.log
+docs/*.aux
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Tests
+tests/
+
+# System files
+Makefile

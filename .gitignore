@@ -18,10 +18,6 @@ dist/
 # MyPy
 .mypy_cache/
 
-# Docker
-docker-compose.yml
-.dockerignore
-Dockerfile
 
 # pyenv
 .python-version
